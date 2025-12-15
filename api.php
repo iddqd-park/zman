@@ -47,6 +47,9 @@ $scenarioId = $data['scenarioId'] ?? 'kim_ji_eun';
 // Get history
 $history = $data['history'] ?? [];
 
+// Get virtual date
+$virtualDate = $data['timeString'] ?? '2002년 10월 24일 오후 2시'; // Default fallback
+
 
 
 // Common Output Format (Appended to all personas)

@@ -27,10 +27,18 @@ $(document).ready(function () {
     let conversationHistory = []; // Array of {role: 'user'|'model', content: string}
     let chatCount = 0;
     let isGameOver = false;
+    let gameTime = null; // Variable to hold the game's current time
 
-    // Game Clock
     function updateGameClock() {
-        const now = new Date();
+        if (!gameTime) {
+            // If gameTime is not initialized, use current real time as a fallback or for initial display
+            gameTime = new Date();
+        } else {
+            // Increment gameTime by 1 second
+            gameTime.setSeconds(gameTime.getSeconds() + 1);
+        }
+
+        const now = gameTime;
 
         const year = now.getFullYear();
         const month = now.getMonth() + 1;
@@ -43,7 +51,7 @@ $(document).ready(function () {
         hours = hours % 12;
         hours = hours ? hours : 12;
 
-        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시 ${minutes}분`;
+        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시`;
         $('#gameClock').text(timeString);
     }
 
@@ -77,6 +85,11 @@ $(document).ready(function () {
         console.log("Starting scenario:", scenarioId);
         currentScenarioId = scenarioId;
         const data = scenarios[scenarioId];
+
+        // 0. Initialize Game Clock (10:00 AM)
+        gameTime = new Date();
+        gameTime.setHours(10, 0, 0, 0);
+        updateGameClock();
 
         // 1. Update Assets
         $('#bgImage').attr('src', data.bg);
@@ -171,6 +184,9 @@ $(document).ready(function () {
         localStorage.setItem('zman_chat_count', chatCount);
 
         try {
+            // Get current game time string
+            const timeString = $('#gameClock').text();
+
             const response = await fetch('api.php', {
                 method: 'POST',
                 headers: {
@@ -179,7 +195,8 @@ $(document).ready(function () {
                 body: JSON.stringify({
                     message: text,
                     history: conversationHistory,
-                    scenarioId: currentScenarioId // Pass ID
+                    scenarioId: currentScenarioId, // Pass ID
+                    timeString: timeString
                 })
             });
 
