@@ -31,13 +31,18 @@ $(document).ready(function () {
 
     function updateGameClock() {
         if (!gameTime) {
-            // If gameTime is not initialized, use current real time as a fallback or for initial display
+            // If gameTime is not initialized, use current real time as a fallback
+            // But we want 2002 environment, so let's subtract 23 years from current time
             gameTime = new Date();
+            gameTime.setFullYear(gameTime.getFullYear() - 23);
+            console.log("game time (1): " + gameTime);
         } else {
             // Increment gameTime by 1 second
             gameTime.setSeconds(gameTime.getSeconds() + 1);
+            console.log("game time (2): " + gameTime);
         }
 
+        console.log("game time (3): " + gameTime);
         const now = gameTime;
 
         const year = now.getFullYear();
@@ -51,7 +56,7 @@ $(document).ready(function () {
         hours = hours % 12;
         hours = hours ? hours : 12;
 
-        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시`;
+        const timeString = `${year}.${month}.${date} ${ampm} ${hours}시`;
         $('#gameClock').text(timeString);
     }
 
@@ -88,6 +93,7 @@ $(document).ready(function () {
 
         // 0. Initialize Game Clock (10:00 AM)
         gameTime = new Date();
+        gameTime.setFullYear(gameTime.getFullYear() - 23);
         gameTime.setHours(10, 0, 0, 0);
         updateGameClock();
 

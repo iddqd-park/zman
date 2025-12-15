@@ -33,7 +33,7 @@
                 <!-- Chat Header -->
                 <div class="chat-header p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
                     <span class="fw-bold ms-2" id="gameClock"></span>
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center flex-shrink-0 text-nowrap">
                         <!-- BGM Toggle -->
                         <button class="btn btn-sm btn-outline-secondary me-2 border-0" id="bgmToggleBtn" title="배경음악 끄기/켜기">
                             🔊
