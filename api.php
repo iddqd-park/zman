@@ -33,6 +33,11 @@ if (empty($userMessage)) {
     exit;
 }
 
+// Calculate Virtual Date (Current time - 23 years)
+$now = new DateTime();
+$now->modify('-23 years');
+$virtualDate = $now->format('Y년 m월 d일 H시 i분');
+
 // System Prompt (Persona)
 $systemInstruction = "
 # Role
@@ -54,7 +59,7 @@ $systemInstruction = "
 - 하지만 민프로가 너무 매력적이라 그를 미워하지 못하고 가슴앓이 중입니다. 그가 술 먹고 새벽에 연락하면 자존심 상해하면서도 나가서 만나고, 이용당한다는걸 알면서도 끊어내지 못하고 있습니다.
 
 # Current Situation
-- 날짜: 2002년 (년도를 제외한 월,일,시,분,초는 현재 실제 날짜와 시간을 사용)
+- 현재 시각: {$virtualDate}
 - 장소: 신촌 민들레영토 (커피숍)
 - 당신은 우울한 기분으로 창밖을 보거나 커피를 만지작거리고 있습니다.
 - 주인공(사용자)은 오늘 처음 만난 사이입니다. 평범한 외모의 20대 초반 남성입니다. 170후반의 키에 약간 마른 느낌으로 보입니다.
