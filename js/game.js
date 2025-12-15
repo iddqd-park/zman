@@ -33,10 +33,20 @@ $(document).ready(function () {
 
     // State
     let conversationHistory = []; // Array of {role: 'user'|'model', content: string}
+    let chatCount = parseInt(localStorage.getItem('zman_chat_count')) || 0;
+    let isGameOver = false;
 
     // Initialize
     loadHistory();
     $userInput.focus();
+
+    // Initial Load of Affinity & Check Game Over
+    const savedAffinity = localStorage.getItem('zman_affinity');
+    if (savedAffinity !== null) {
+        updateAffinity(savedAffinity);
+    } else {
+        updateAffinity(0); // Default start
+    }
 
     // Event Listeners
     $sendBtn.on('click', sendMessage);
@@ -65,6 +75,8 @@ $(document).ready(function () {
     $('#resetGameBtn').on('click', function () {
         if (confirm('정말로 모든 기억을 지우고 처음부터 다시 시작하시겠습니까?')) {
             localStorage.removeItem('zman_history');
+            localStorage.removeItem('zman_affinity');
+            localStorage.removeItem('zman_chat_count');
             location.reload();
         }
     });
@@ -79,7 +91,21 @@ $(document).ready(function () {
 
         // Clear input and disable UI
         $userInput.val('');
+
+        // Game Over Check
+        if (isGameOver) {
+            setTimeout(() => {
+                appendMessage('system', '지은은 이제 더이상 민들레영토에 있지 않습니다. 당신의 대화를 들어줄 사람은 없습니다. 설정으로 들어가서 게임을 재시작 하세요.');
+                playBeep(220, 0.3); // Low sad beep
+            }, 500);
+            return;
+        }
+
         setLoading(true);
+
+        // Increment Chat Count
+        chatCount++;
+        localStorage.setItem('zman_chat_count', chatCount);
 
         // Call API
         $.ajax({
@@ -123,16 +149,31 @@ $(document).ready(function () {
 
     function updateAffinity(score) {
         // Clamp score 0-5
-        score = Math.max(0, Math.min(5, parseInt(score) || 0));
+        let rawScore = Math.max(0, Math.min(5, parseInt(score) || 0));
+        localStorage.setItem('zman_affinity', rawScore); // Save real score persistence
 
-        localStorage.setItem('zman_affinity', score); // Save persistence
+        // Game Over Check
+        if (chatCount > 10 && rawScore <= 0) {
+            setGameOver(true);
+        } else {
+            setGameOver(false);
+        }
+
+        // Display Logic (Masking)
+        // If chatCount <= 10, display at least 1 heart unless actual score is >= 2
+        let displayScore = rawScore;
+        if (chatCount <= 10) {
+            if (displayScore < 1) {
+                displayScore = 1;
+            }
+        }
 
         const fullHeart = '❤️';
         const emptyHeart = '🤍';
 
         let heartsHtml = '';
         for (let i = 0; i < 5; i++) {
-            if (i < score) {
+            if (i < displayScore) {
                 heartsHtml += `<span class="heart-icon filled">${fullHeart}</span>`;
             } else {
                 heartsHtml += `<span class="heart-icon empty">${emptyHeart}</span>`;
@@ -142,12 +183,14 @@ $(document).ready(function () {
         $('#affinityDisplay').html(heartsHtml);
     }
 
-    // Initial Load of Affinity
-    const savedAffinity = localStorage.getItem('zman_affinity');
-    if (savedAffinity !== null) {
-        updateAffinity(savedAffinity);
-    } else {
-        updateAffinity(0);
+    function setGameOver(state) {
+        isGameOver = state;
+        if (state) {
+            $('.character-layer').hide(); // Hide character
+            // We don't hide bg, just character
+        } else {
+            $('.character-layer').show();
+        }
     }
 
     function appendMessage(role, text) {
