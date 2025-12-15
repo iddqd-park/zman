@@ -119,15 +119,24 @@ $(document).ready(function () {
                 })
             });
 
+            if (!response.ok) {
+                const errText = await response.text();
+                console.error("API Error (HTTP " + response.status + "):", errText);
+                throw new Error("HTTP " + response.status);
+            }
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let accumulatedJson = "";
+            let fullRawCapture = "";
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
+                fullRawCapture += chunk;
+
                 // Process SSE lines
                 const lines = chunk.split('\n');
                 for (const line of lines) {
@@ -153,9 +162,55 @@ $(document).ready(function () {
 
             // Stream finished, Parse Full JSON
             try {
+                if (!accumulatedJson) throw new Error("Empty response from AI");
+
                 // Sometimes Gemini adds markdown code blocks around JSON ```json ... ```
                 let cleanerJson = accumulatedJson.replace(/```json/g, '').replace(/```/g, '').trim();
-                const result = JSON.parse(cleanerJson);
+
+                // HOTFIX: Gemini sometimes double-quotes keys like ""affinity"" or ""reply""
+                cleanerJson = cleanerJson.replace(/""([a-zA-Z0-9_]+)""/g, '"$1"');
+
+                let result;
+                try {
+                    result = JSON.parse(cleanerJson);
+                } catch (e) {
+                    console.warn("First JSON parse failed, attempting recovery...", e);
+
+                    // Recovery 1: Find the last valid start of the JSON object (in case of restarts/garbage)
+                    const regex = /\{\s*"reply"/g;
+                    let match;
+                    let lastIndex = -1;
+                    while ((match = regex.exec(cleanerJson)) !== null) {
+                        lastIndex = match.index;
+                    }
+
+                    if (lastIndex !== -1) {
+                        const subJson = cleanerJson.substring(lastIndex);
+                        try {
+                            result = JSON.parse(subJson);
+                            console.log("Recovered JSON via substring logic.");
+                        } catch (e2) {
+                            console.warn("Recovery 1 failed.");
+                        }
+                    }
+
+                    // Recovery 2: Regex Extraction (Hail Mary)
+                    if (!result) {
+                        const replyMatch = cleanerJson.match(/"reply"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+                        const affinityMatch = cleanerJson.match(/"affinity"\s*:\s*(\d+)/);
+
+                        if (replyMatch) {
+                            result = {
+                                reply: replyMatch[1].replace(/\\"/g, '"').replace(/\\n/g, '\n'), // Unescape basic chars
+                                affinity: affinityMatch ? parseInt(affinityMatch[1]) : 0
+                            };
+                            console.log("Recovered JSON via Regex extraction.");
+                        } else {
+                            // If all failed, throw original error to trigger catch block
+                            throw e;
+                        }
+                    }
+                }
 
                 if (result.reply) {
                     playBeep(880, 0.1); // High beep for NPC reply
@@ -168,8 +223,8 @@ $(document).ready(function () {
                     updateAffinity(result.affinity);
                 }
             } catch (e) {
-                console.error("JSON Parse Error:", e, accumulatedJson);
-                appendMessage('system', "⛔ 응답 처리 오류: AI가 유효하지 않은 응답을 보냈습니다.");
+                console.error("JSON Parse Error:", e, "Accumulated:", accumulatedJson, "Raw Response:", fullRawCapture);
+                appendMessage('system', "⛔ ERROR: 다시 채팅을 입력해주세요. (JSON 처리 실패)");
             }
 
         } catch (error) {

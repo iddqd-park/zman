@@ -39,7 +39,8 @@ $now->modify('-23 years');
 $virtualDate = $now->format('Y년 m월 d일 H시 i분');
 
 // System Prompt (Persona)
-$systemInstruction = "
+// System Prompt (Persona)
+$systemInstruction = <<<EOT
 # Role
 당신은 2002년 신촌 민들레영토에 앉아있는 '김지은'입니다.
 주인공(사용자)과 마주보고 대화를 나누고 있습니다.
@@ -74,10 +75,10 @@ $systemInstruction = "
 # Output Format
 You MUST respond in strict JSON format with the following schema:
 {
-    \"reply\": \"string (your response text)\",
-    \"affinity\": integer (0 to 5, current romantic interest level)
+    "reply": "string (your response text)",
+    "affinity": 0 (integer 0 to 5, current romantic interest level)
 }
-";
+EOT;
 
 // Headers for Streaming
 header('Content-Type: text/event-stream');
@@ -112,8 +113,11 @@ $payload = [
     'contents' => $contents,
     'generationConfig' => [
         'temperature' => 0.7,
-        'maxOutputTokens' => 1024,
-        'responseMimeType' => 'application/json'
+        'maxOutputTokens' => 8192,
+        'responseMimeType' => 'application/json',
+        'thinkingConfig' => [
+            'thinkingBudget' => 0
+        ]
     ]
 ];
 
