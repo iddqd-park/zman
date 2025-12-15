@@ -77,7 +77,7 @@ $(document).ready(function () {
         // Check if we are physically on play.php to avoid loop if index.php included this (it doesn't, but safe)
         if (window.location.pathname.includes('play.php')) {
             alert("잘못된 접근입니다. 캐릭터를 다시 선택해주세요.");
-            window.location.href = 'index.php';
+            window.location.href = './';
         }
     }
 
@@ -150,7 +150,7 @@ $(document).ready(function () {
     $('#resetGameBtn').text('메인 화면으로'); // Update Text
     $('#resetGameBtn').off('click').on('click', function () {
         if (confirm('현재 대화를 종료하고 메인 화면으로 돌아가시겠습니까?')) {
-            window.location.href = 'index.php';
+            window.location.href = './';
         }
     });
     async function sendMessage() {
@@ -395,7 +395,7 @@ $(document).ready(function () {
 
             // Bind Click
             $('#gameOverHomeBtn').on('click', function () {
-                window.location.href = 'index.php';
+                window.location.href = './';
             });
 
         } else {

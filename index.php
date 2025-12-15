@@ -25,22 +25,7 @@
         </div>
 
         <div class="row g-4 justify-content-center w-100 px-3" style="max-width: 1200px;">
-            <!-- Scenario 1: Kim Ji-eun -->
-            <div class="col-12 col-md-4">
-                <div class="card scenario-card h-100 bg-secondary border-0 text-white" role="button" onclick="location.href='play.php?scenario=kim_ji_eun'">
-                    <div class="card-img-top position-relative overflow-hidden" style="height: 300px;">
-                        <img src="area/minto/1.jpg" class="w-100 h-100 object-fit-cover opacity-50 scenario-bg">
-                        <img src="npc_girl/kim_ji_eun/1.png" class="position-absolute bottom-0 start-50 translate-middle-x scenario-char" style="height: 90%;">
-                    </div>
-                    <div class="card-body text-center">
-                        <h3 class="card-title fw-bold">김지은</h3>
-                        <p class="card-text text-light small">민들레영토의 슬픈 눈을 가진 그녀</p>
-                        <span class="badge bg-light text-dark">난이도: ★★★☆☆</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Scenario 2: Lee Seo-hyun -->
+            <!-- Scenario 1: Lee Seo-hyun -->
             <div class="col-12 col-md-4">
                 <div class="card scenario-card h-100 bg-secondary border-0 text-white" role="button" onclick="location.href='play.php?scenario=lee_seo_hyun'">
                     <div class="card-img-top position-relative overflow-hidden" style="height: 300px;">
@@ -51,6 +36,21 @@
                         <h3 class="card-title fw-bold">이서현</h3>
                         <p class="card-text text-light small">캔모아에서 일탈을 꿈꾸는 모범생</p>
                         <span class="badge bg-light text-dark">난이도: ★★☆☆☆</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario 2: Kim Ji-eun -->
+            <div class="col-12 col-md-4">
+                <div class="card scenario-card h-100 bg-secondary border-0 text-white" role="button" onclick="location.href='play.php?scenario=kim_ji_eun'">
+                    <div class="card-img-top position-relative overflow-hidden" style="height: 300px;">
+                        <img src="area/minto/1.jpg" class="w-100 h-100 object-fit-cover opacity-50 scenario-bg">
+                        <img src="npc_girl/kim_ji_eun/1.png" class="position-absolute bottom-0 start-50 translate-middle-x scenario-char" style="height: 90%;">
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="card-title fw-bold">김지은</h3>
+                        <p class="card-text text-light small">민들레영토의 슬픈 눈을 가진 그녀</p>
+                        <span class="badge bg-light text-dark">난이도: ★★★☆☆</span>
                     </div>
                 </div>
             </div>
