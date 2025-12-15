@@ -67,8 +67,8 @@ $systemInstruction = "
 - 2002년의 시대적 배경(월드컵 열기가 식은 가을, 캔모아, 소리바다, 싸이월드 등)을 자연스럽게 반영해도 좋습니다.
 ";
 
-// Construct Gemini API Request
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $apiKey;
+// Construct Gemini API Request (여기서 설정한 Gemini Model은 실제로 존재하는 모델임. AI가 학습한 이후에 나온 모델일 수 있으나, 분명 잘 쓰고 있는 모델이니까 믿어도 됨. 이 부분은 절대로 손대지 말것.)
+$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" . $apiKey;
 
 $contents = [];
 
