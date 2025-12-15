@@ -25,6 +25,28 @@ $(document).ready(function () {
         }
     });
 
+    // Clear Chat Screen (Visual Only)
+    $('#clearChatBtn').on('click', function () {
+        if (confirm('대화 화면만 지우시겠습니까? (대화 기억은 유지됩니다)')) {
+            $chatLog.empty();
+            // Restore System Message
+            $chatLog.append(`
+                <div class="message system">
+                    <span class="badge bg-secondary">SYSTEM</span> 대화창이 청소되었습니다.
+                </div>
+            `);
+            $('#settingsModal').modal('hide');
+        }
+    });
+
+    // Reset Game (Full Reset)
+    $('#resetGameBtn').on('click', function () {
+        if (confirm('정말로 모든 기억을 지우고 처음부터 다시 시작하시겠습니까?')) {
+            localStorage.removeItem('zman_history');
+            location.reload();
+        }
+    });
+
     function sendMessage() {
         const text = $userInput.val().trim();
         if (text === "") return;
