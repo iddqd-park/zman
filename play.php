@@ -33,9 +33,14 @@
                 <!-- Chat Header -->
                 <div class="chat-header p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
                     <span class="fw-bold ms-2" id="gameClock"></span>
-                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                        ⚙️ 설정
-                    </button>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                            ⚙️ 설정
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="if(confirm('정말 나가시겠습니까?')) location.href='./'">
+                            🚪 나가기
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Game/Dialogue Log -->
