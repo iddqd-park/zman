@@ -35,14 +35,11 @@ $(document).ready(function () {
             // But we want 2002 environment, so let's subtract 23 years from current time
             gameTime = new Date();
             gameTime.setFullYear(gameTime.getFullYear() - 23);
-            console.log("game time (1): " + gameTime);
         } else {
             // Increment gameTime by 1 second
             gameTime.setSeconds(gameTime.getSeconds() + 1);
-            console.log("game time (2): " + gameTime);
         }
 
-        console.log("game time (3): " + gameTime);
         const now = gameTime;
 
         const year = now.getFullYear();
@@ -411,7 +408,7 @@ $(document).ready(function () {
         const fullHeart = '❤️';
         const emptyHeart = '🤍';
 
-        let heartsHtml = '';
+        let heartsHtml = '<div class="text-white small mb-1" style="text-shadow: 1px 1px 2px black;">당신에 대한 그녀의 호감도</div>';
         for (let i = 0; i < 5; i++) {
             if (i < displayScore) {
                 heartsHtml += `<span class="heart-icon filled">${fullHeart}</span>`;

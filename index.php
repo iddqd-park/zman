@@ -73,11 +73,13 @@
 
         <div class="mt-5 text-center">
              <div class="d-flex gap-3 justify-content-center">
+                <a href="https://iddqd.kr" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">Homepage</a>
                 <a href="https://x.com/iddqd_park" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">X (Twitter)</a>
                 <a href="https://www.threads.net/@iddqd.park" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">Threads</a>
+                <a href="https://www.youtube.com/@IDDQD-INTERNET" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">YouTube</a>
             </div>
             <p class="mt-3 text-white-50 small">
-                <a href="https://iddqd.kr" target="_blank" class="text-white-50 text-decoration-none footer-link">IDDQD 인터넷 제공</a>
+                IDDQD 인터넷 제공
             </p>
         </div>
     </div>
