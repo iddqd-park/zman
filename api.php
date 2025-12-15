@@ -254,5 +254,5 @@ curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) {
 });
 
 ignore_user_abort(true);
-
+curl_exec($ch);
 curl_close($ch);
