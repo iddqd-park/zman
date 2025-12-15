@@ -79,17 +79,19 @@ You MUST respond in strict JSON format with the following schema:
 }
 ";
 
-// Construct Gemini API Request
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $apiKey;
+// Headers for Streaming
+header('Content-Type: text/event-stream');
+header('Cache-Control: no-cache');
+header('X-Accel-Buffering: no'); // Disable Nginx buffering
+
+// Construct Gemini API Request (Streaming)
+$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse";
 
 $contents = [];
 
 // Add History
 foreach ($history as $msg) {
-    // History contains raw text, but now we expect JSON from model. 
-    // Ideally we should just pass the text content for history to avoid confusing the model with previous JSON blobs, 
-    // or just pass the text reply.
-    // For simplicity, we assume frontend passes just the text content in history.
+    // History contains raw text.
     $role = ($msg['role'] === 'user') ? 'user' : 'model';
     $contents[] = [
         'role' => $role,
@@ -116,33 +118,25 @@ $payload = [
 ];
 
 $ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'x-goog-api-key: ' . $apiKey
+]);
+curl_setopt($ch, CURLOPT_TIMEOUT, 0); // Prevent timeout
 
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curlError = curl_error($ch);
+// Write Function for Streaming Proxy
+curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) {
+    echo $data;
+    if (connection_aborted()) {
+        return 0;
+    }
+    @ob_flush();
+    flush();
+    return strlen($data);
+});
+
+ignore_user_abort(true);
+curl_exec($ch);
 curl_close($ch);
-
-if ($response === false) {
-    echo json_encode(['error' => 'Curl Error', 'details' => $curlError]);
-    exit;
-}
-
-if ($httpCode !== 200) {
-    $decodedErr = json_decode($response, true);
-    $errorMsg = $decodedErr['error']['message'] ?? $response;
-    echo json_encode(['error' => 'API Error (' . $httpCode . ')', 'details' => $errorMsg]);
-    exit;
-}
-
-$decoded = json_decode($response, true);
-$rawText = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
-$jsonResponse = json_decode($rawText, true);
-
-$reply = $jsonResponse['reply'] ?? '...';
-$affinity = $jsonResponse['affinity'] ?? 0;
-
-echo json_encode(['reply' => $reply, 'affinity' => $affinity]);

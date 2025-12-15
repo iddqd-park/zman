@@ -81,7 +81,7 @@ $(document).ready(function () {
         }
     });
 
-    function sendMessage() {
+    async function sendMessage() {
         const text = $userInput.val().trim();
         if (text === "") return;
 
@@ -107,44 +107,78 @@ $(document).ready(function () {
         chatCount++;
         localStorage.setItem('zman_chat_count', chatCount);
 
-        // Call API
-        $.ajax({
-            url: 'api.php',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                message: text,
-                history: conversationHistory.filter(msg => msg !== conversationHistory[conversationHistory.length - 1]) // Previous history
-            }),
-            success: function (response) {
-                if (response.reply) {
+        try {
+            const response = await fetch('api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: text,
+                    history: conversationHistory.filter(msg => msg !== conversationHistory[conversationHistory.length - 1])
+                })
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedJson = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                // Process SSE lines
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const jsonStr = line.substring(6).trim();
+                        if (jsonStr === '[DONE]') continue; // Standard SSE end, though Gemini usually sends valid JSON or nothing
+
+                        try {
+                            const data = JSON.parse(jsonStr);
+                            if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
+                                const partText = data.candidates[0].content.parts[0].text;
+                                if (partText) {
+                                    accumulatedJson += partText;
+                                }
+                            }
+                        } catch (e) {
+                            // Ignore parse errors for partial lines (though SSE lines should be complete ideally)
+                            // or simple keep-alives
+                        }
+                    }
+                }
+            }
+
+            // Stream finished, Parse Full JSON
+            try {
+                // Sometimes Gemini adds markdown code blocks around JSON ```json ... ```
+                let cleanerJson = accumulatedJson.replace(/```json/g, '').replace(/```/g, '').trim();
+                const result = JSON.parse(cleanerJson);
+
+                if (result.reply) {
                     playBeep(880, 0.1); // High beep for NPC reply
-                    appendMessage('model', response.reply);
-                    addToHistory('model', response.reply);
+                    appendMessage('model', result.reply);
+                    addToHistory('model', result.reply);
                 }
 
                 // Update Affinity if present
-                if (typeof response.affinity !== 'undefined') {
-                    updateAffinity(response.affinity);
+                if (typeof result.affinity !== 'undefined') {
+                    updateAffinity(result.affinity);
                 }
-
-                if (response.error) {
-                    let detailMsg = response.details;
-                    if (typeof detailMsg === 'object') {
-                        detailMsg = JSON.stringify(detailMsg);
-                    }
-                    appendMessage('system', `⛔ Error (${response.error}): ${detailMsg}`);
-                    console.error("API Error Details:", response.details);
-                }
-            },
-            error: function (xhr, status, error) {
-                appendMessage('system', "Network Error: " + error);
-            },
-            complete: function () {
-                setLoading(false);
-                $userInput.focus();
+            } catch (e) {
+                console.error("JSON Parse Error:", e, accumulatedJson);
+                appendMessage('system', "⛔ 응답 처리 오류: AI가 유효하지 않은 응답을 보냈습니다.");
             }
-        });
+
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            appendMessage('system', "Network Error: " + error.message);
+        } finally {
+            setLoading(false);
+            $userInput.focus();
+        }
     }
 
     function updateAffinity(score) {
