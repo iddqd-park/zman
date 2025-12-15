@@ -324,7 +324,11 @@ $(document).ready(function () {
 
         // Game Over Check
         if (chatCount > 10 && rawScore <= 0) {
-            setGameOver(true);
+            if (!isGameOver) {
+                const charName = scenarios[currentScenarioId].name;
+                appendMessage('system', `더 이상 대화를 이어갈 수 없다고 판단한 ${charName}은(는) 자리를 떠났다.`);
+                setGameOver(true);
+            }
         } else {
             setGameOver(false);
         }
@@ -355,17 +359,71 @@ $(document).ready(function () {
 
     function setGameOver(state) {
         isGameOver = state;
+        const $inputGroup = $userInput.parent(); // Assuming userInput is inside a group or container
+
         if (state) {
             $('.character-layer').hide(); // Hide character
-            // We don't hide bg, just character
+
+            // Hide Input and Send Button
+            $userInput.hide();
+            $sendBtn.hide();
+
+            // Remove existing home button if any to prevent duplicates
+            $('#gameOverHomeBtn').remove();
+
+            // Add Red Home Button
+            const homeBtnHtml = `
+                <button id="gameOverHomeBtn" class="btn btn-danger w-100 p-3 fw-bold" style="border-radius: 0;">
+                    메인으로 돌아가기
+                </button>
+            `;
+
+            // we want to place it where userInput was.
+            // If .input-group exists, we might want to hide the whole group and show the button, 
+            // OR append to the parent. Let's append to the parent of userInput context commonly used in these chat apps.
+            // Looking at standard bootstrap structure: <div class="input-group"> <input> <button> </div>
+            // It's safer to hide the siblings and append to parent, or hide parent and append to container.
+            // Let's assume $userInput and $sendBtn are siblings.
+
+            if ($userInput.parent().hasClass('input-group')) {
+                $userInput.parent().hide();
+                $userInput.parent().parent().append(homeBtnHtml);
+            } else {
+                // Fallback
+                $userInput.after(homeBtnHtml);
+            }
+
+            // Bind Click
+            $('#gameOverHomeBtn').on('click', function () {
+                window.location.href = 'index.php';
+            });
+
         } else {
-            // Only show if we are IN game screen.
-            // But since this function is usually called during updateAffinity which happens during message exchange, we are likely in game.
+            // Restore UI
             if ($('#gameScreen').is(':visible')) {
                 $('.character-layer').show();
             }
+
+            $('#gameOverHomeBtn').remove();
+
+            if ($userInput.parent().hasClass('input-group')) {
+                $userInput.parent().show();
+            }
+            $userInput.show();
+            $sendBtn.show();
         }
     }
+
+    // Expose Debug Function
+    window.debugChat = function () {
+        console.log("=== Debug: Conversation History ===");
+        console.table(conversationHistory);
+        console.log("Current Scenario:", currentScenarioId);
+        console.log("Raw History Array:", JSON.stringify(conversationHistory, null, 2));
+        console.log("===================================");
+    };
+
+
 
     function appendMessage(role, text) {
         let html = '';
