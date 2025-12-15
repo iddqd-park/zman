@@ -95,7 +95,14 @@ $(document).ready(function () {
                     playBeep(880, 0.1); // High beep for NPC reply
                     appendMessage('model', response.reply);
                     addToHistory('model', response.reply);
-                } else if (response.error) {
+                }
+
+                // Update Affinity if present
+                if (typeof response.affinity !== 'undefined') {
+                    updateAffinity(response.affinity);
+                }
+
+                if (response.error) {
                     let detailMsg = response.details;
                     if (typeof detailMsg === 'object') {
                         detailMsg = JSON.stringify(detailMsg);
@@ -112,6 +119,35 @@ $(document).ready(function () {
                 $userInput.focus();
             }
         });
+    }
+
+    function updateAffinity(score) {
+        // Clamp score 0-5
+        score = Math.max(0, Math.min(5, parseInt(score) || 0));
+
+        localStorage.setItem('zman_affinity', score); // Save persistence
+
+        const fullHeart = '❤️';
+        const emptyHeart = '🤍';
+
+        let heartsHtml = '';
+        for (let i = 0; i < 5; i++) {
+            if (i < score) {
+                heartsHtml += `<span class="heart-icon filled">${fullHeart}</span>`;
+            } else {
+                heartsHtml += `<span class="heart-icon empty">${emptyHeart}</span>`;
+            }
+        }
+
+        $('#affinityDisplay').html(heartsHtml);
+    }
+
+    // Initial Load of Affinity
+    const savedAffinity = localStorage.getItem('zman_affinity');
+    if (savedAffinity !== null) {
+        updateAffinity(savedAffinity);
+    } else {
+        updateAffinity(0);
     }
 
     function appendMessage(role, text) {

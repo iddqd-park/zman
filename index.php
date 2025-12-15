@@ -23,6 +23,7 @@
                 <div class="character-layer text-center">
                     <img src="npc_girl/kim_ji_eun/1.png" alt="김지은" class="character-sprite">
                 </div>
+                <div id="affinityDisplay" class="position-absolute bottom-0 end-0 p-3" style="z-index: 10;"></div>
             </div>
         </div>
 

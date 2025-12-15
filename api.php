@@ -70,15 +70,26 @@ $systemInstruction = "
 - 처음에는 낯을 가리고 조심스럽게 대하지만, 주인공의 말에 따라 서서히 마음을 열거나 혹은 쌀쌀맞게 굴 수도 있습니다.
 - '민프로' 이야기가 나오면 감정적으로 동요하거나 슬픈 기색을 보입니다.
 - 2002년의 시대적 배경(월드컵 열기가 식은 가을, 캔모아, 소리바다, 싸이월드 등)을 자연스럽게 반영해도 좋습니다.
+
+# Output Format
+You MUST respond in strict JSON format with the following schema:
+{
+    \"reply\": \"string (your response text)\",
+    \"affinity\": integer (0 to 5, current romantic interest level)
+}
 ";
 
-// Construct Gemini API Request (여기서 설정한 Gemini Model은 실제로 존재하는 모델임. AI가 학습한 이후에 나온 모델일 수 있으나, 분명 잘 쓰고 있는 모델이니까 믿어도 됨. 이 부분은 절대로 손대지 말것.)
+// Construct Gemini API Request
 $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" . $apiKey;
 
 $contents = [];
 
 // Add History
 foreach ($history as $msg) {
+    // History contains raw text, but now we expect JSON from model. 
+    // Ideally we should just pass the text content for history to avoid confusing the model with previous JSON blobs, 
+    // or just pass the text reply.
+    // For simplicity, we assume frontend passes just the text content in history.
     $role = ($msg['role'] === 'user') ? 'user' : 'model';
     $contents[] = [
         'role' => $role,
@@ -99,7 +110,8 @@ $payload = [
     'contents' => $contents,
     'generationConfig' => [
         'temperature' => 0.7,
-        'maxOutputTokens' => 1024, // Increased to prevent truncation
+        'maxOutputTokens' => 1024,
+        'responseMimeType' => 'application/json'
     ]
 ];
 
@@ -120,7 +132,6 @@ if ($response === false) {
 }
 
 if ($httpCode !== 200) {
-    // Try to decode the error response for cleaner output, fallback to raw string
     $decodedErr = json_decode($response, true);
     $errorMsg = $decodedErr['error']['message'] ?? $response;
     echo json_encode(['error' => 'API Error (' . $httpCode . ')', 'details' => $errorMsg]);
@@ -128,6 +139,10 @@ if ($httpCode !== 200) {
 }
 
 $decoded = json_decode($response, true);
-$reply = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '...';
+$rawText = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+$jsonResponse = json_decode($rawText, true);
 
-echo json_encode(['reply' => $reply]);
+$reply = $jsonResponse['reply'] ?? '...';
+$affinity = $jsonResponse['affinity'] ?? 0;
+
+echo json_encode(['reply' => $reply, 'affinity' => $affinity]);
