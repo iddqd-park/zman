@@ -132,27 +132,66 @@ $(document).ready(function () {
         }
     });
 
-    // Clear Chat Screen (Visual Only)
-    $('#clearChatBtn').on('click', function () {
-        if (confirm('대화 화면만 지우시겠습니까? (대화 기억은 유지됩니다)')) {
-            $chatLog.empty();
-            // Restore System Message
-            $chatLog.append(`
-                <div class="message system">
-                    <span class="badge bg-secondary">SYSTEM</span> 대화창이 청소되었습니다.
-                </div>
-            `);
-            $('#settingsModal').modal('hide');
+    /* =========================================
+       BGM Player Logic
+       ========================================= */
+    let bgmAudio = new Audio();
+    let bgmIndex = 0;
+    let isBgmMuted = false;
+
+    // Shuffle Playlist
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    if (typeof bgmPlaylist !== 'undefined' && bgmPlaylist.length > 0) {
+        shuffleArray(bgmPlaylist);
+
+        // Initial Track
+        bgmAudio.src = bgmPlaylist[bgmIndex];
+        bgmAudio.volume = 0.3; // -10dB approx
+
+        // Autoplay attempt
+        let playPromise = bgmAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                // Autoplay started!
+                console.log("BGM Autoplay started.");
+            }).catch(error => {
+                // Autoplay was prevented
+                console.log("BGM Autoplay prevented. Waiting for user interaction.");
+                // Add one-time click listener to body to start music
+                $(document).one('click', function () {
+                    if (!bgmAudio.paused) return;
+                    bgmAudio.play();
+                });
+            });
+        }
+
+        // Loop Logic
+        bgmAudio.addEventListener('ended', function () {
+            bgmIndex = (bgmIndex + 1) % bgmPlaylist.length;
+            bgmAudio.src = bgmPlaylist[bgmIndex];
+            bgmAudio.play();
+        });
+    }
+
+    // Toggle Button
+    $('#bgmToggleBtn').on('click', function () {
+        if (bgmAudio.paused) {
+            bgmAudio.play();
+            $(this).text('🔊');
+        } else {
+            bgmAudio.pause();
+            $(this).text('🔇');
         }
     });
 
-    // Return to Title (Replacing Reset Game)
-    $('#resetGameBtn').text('메인 화면으로'); // Update Text
-    $('#resetGameBtn').off('click').on('click', function () {
-        if (confirm('현재 대화를 종료하고 메인 화면으로 돌아가시겠습니까?')) {
-            window.location.href = './';
-        }
-    });
+
+
     async function sendMessage() {
         const text = $userInput.val().trim();
         if (text === "") return;

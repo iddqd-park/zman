@@ -33,10 +33,12 @@
                 <!-- Chat Header -->
                 <div class="chat-header p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
                     <span class="fw-bold ms-2" id="gameClock"></span>
-                    <div>
-                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                            ⚙️ 설정
+                    <div class="d-flex align-items-center">
+                        <!-- BGM Toggle -->
+                        <button class="btn btn-sm btn-outline-secondary me-2 border-0" id="bgmToggleBtn" title="배경음악 끄기/켜기">
+                            🔊
                         </button>
+
                         <button class="btn btn-sm btn-outline-danger ms-1" onclick="if(confirm('정말 나가시겠습니까?')) location.href='./'">
                             🚪 나가기
                         </button>
@@ -62,52 +64,20 @@
         </div>
     </div>
 
-<!-- Settings Modal -->
-<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="settingsModalLabel">2002 신촌, 그녀와의 만남</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted small mb-4">
-                    2002년의 감성을 담은 미연시 게임입니다.<br>
-                    그녀와의 대화를 통해 이야기를 풀어나가보세요.
-                </p>
-
-                <div class="d-grid gap-2 mb-4">
-                    <button class="btn btn-outline-warning" id="clearChatBtn">
-                        🧹 대화창 비우기 (기록 유지)
-                    </button>
-                    <button class="btn btn-outline-danger" id="resetGameBtn">
-                        🔄 게임 완전 재시작 (기록 삭제)
-                    </button>
-                </div>
-
-                <hr>
-
-                <div class="text-center small text-secondary">
-                    <p class="mb-2">
-                        게임에 대한 의견은 
-                        <a href="https://x.com/iddqd_park" target="_blank" class="text-decoration-underline link-dark">X(Twitter)</a>나 
-                        <a href="https://www.threads.net/@iddqd.park" target="_blank" class="text-decoration-underline link-dark">Threads</a>로 부탁드립니다.
-                    </p>
-                    <a href="https://iddqd.kr" target="_blank" class="text-decoration-none fw-bold text-dark">
-                        IDDQD 인터넷 제공
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-    </div>
-</div>
-
 <!-- jQuery & Bootstrap Bundle -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Game Logic -->
+<?php
+// Get BGM Files
+$bgmFiles = glob('bgm/*.mp3');
+// Base URL adjustments if needed, assuming relative path 'bgm/...' works from play.php
+// Force encoding to ensure valid JSON
+$bgmJson = json_encode($bgmFiles);
+?>
+<script>
+    const bgmPlaylist = <?php echo $bgmJson; ?>;
+</script>
 <script src="js/game.js"></script>
 
 </body>
