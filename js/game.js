@@ -1,6 +1,28 @@
 $(document).ready(function () {
     console.log("Game initialized.");
 
+    // Game Clock
+    function updateGameClock() {
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+        let hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        const ampm = hours >= 12 ? '오후' : '오전';
+
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+
+        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시 ${minutes}분 ${seconds}초`;
+        $('#gameClock').text(timeString);
+    }
+
+    setInterval(updateGameClock, 1000);
+    updateGameClock(); // Initial call
+
     // settings
     const MAX_HISTORY_BYTES = 10000; // 10KB limit
 

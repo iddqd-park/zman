@@ -30,7 +30,7 @@
         <div class="col-lg-4 col-xl-3 col-12 chat-interface d-flex flex-column">
             <!-- Chat Header -->
             <div class="chat-header p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
-                <span class="fw-bold ms-2">💬 대화하기</span>
+                <span class="fw-bold ms-2" id="gameClock">2002년 12월 15일 오후 ?시 ?분</span>
                 <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
                     ⚙️ 설정
                 </button>

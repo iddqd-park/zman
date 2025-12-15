@@ -7,14 +7,13 @@ html {
     font-family: 'Noto Sans KR', sans-serif;
     overflow: hidden;
     /* Prevent body scroll */
-    background-color: #555555;
+    background-color: #222222;
     /* PC 남는 영역 배경색 */
 }
 
 /* Visual Area */
-/* Visual Area Wrapper (The dark background container) */
 .visual-area-wrapper {
-    background-color: #555555;
+    background-color: #222222;
     /* Common Background */
     position: relative;
     overflow: hidden;
