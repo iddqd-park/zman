@@ -68,23 +68,50 @@ html {
 }
 
 /* Mobile Specific Optimizations */
+/* Mobile Specific Optimizations */
 @media (max-width: 991.98px) {
     .visual-area-wrapper {
-        height: auto;
+        height: 35vh;
+        /* Fixed height for visual area */
         padding: 0;
+        z-index: 10;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        /* Shadow to separate from chat */
     }
 
     .game-stage {
+        /* Maintain 4:3 ratio to ensure background and character align perfectly */
+        aspect-ratio: 4/3;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        position: relative;
+    }
+
+    .background-img {
+        max-height: 100%;
         width: 100%;
-        /* aspect-ratio handled by class default */
-        box-shadow: none;
+        object-fit: contain;
+        /* Show full image */
     }
 
     .chat-interface {
-        height: auto;
-        flex: 1;
+        height: 65vh;
+        /* Remaining height */
+        flex: none;
+        /* Disable flex growing in row context, force fixed height */
         border-left: none;
-        border-top: 1px solid #dee2e6;
+        border-top: 1px solid #444;
+        /* Darker separator */
+    }
+
+    /* Ensure chat log scrolls properly */
+    .chat-log {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* Smooth scroll on iOS */
     }
 }
 
