@@ -67,13 +67,7 @@ $systemInstruction = "
 ";
 
 // Construct Gemini API Request
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
-
-$contents = [];
-
-// System Instruction (Gemini 1.5 supports system_instruction, but mapped to content for simple compat or explicit field)
-// Using standard chat structure
-// Note: Gemini 1.5 Flash supports 'system_instruction' field at root level.
+$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $apiKey;
 
 $contents = [];
 
