@@ -83,7 +83,11 @@
                 <hr>
 
                 <div class="text-center small text-secondary">
-                    <p class="mb-2">게임에 대한 의견은 X(Twitter)나 Threads로 부탁드립니다.</p>
+                    <p class="mb-2">
+                        게임에 대한 의견은 
+                        <a href="https://x.com/iddqd_park" target="_blank" class="text-decoration-underline link-dark">X(Twitter)</a>나 
+                        <a href="https://www.threads.net/@iddqd.park" target="_blank" class="text-decoration-underline link-dark">Threads</a>로 부탁드립니다.
+                    </p>
                     <a href="https://iddqd.kr" target="_blank" class="text-decoration-none fw-bold text-dark">
                         IDDQD 인터넷 제공
                     </a>
