@@ -29,13 +29,13 @@ $(document).ready(function () {
         const text = $userInput.val().trim();
         if (text === "") return;
 
-        // Clear input and disable UI
-        $userInput.val('');
-        setLoading(true);
-
         // Append Player Message locally
         appendMessage('user', text);
         addToHistory('user', text);
+
+        // Clear input and disable UI
+        $userInput.val('');
+        setLoading(true);
 
         // Call API
         $.ajax({
@@ -68,9 +68,16 @@ $(document).ready(function () {
     function appendMessage(role, text) {
         let html = '';
         if (role === 'model') {
-            html = `<div class="message npc"><span class="npc-name">지은:</span> ${text}</div>`;
+            html = `
+                <div class="message npc-container">
+                    <div class="npc-name">지은</div>
+                    <div class="message-bubble npc">${text}</div>
+                </div>`;
         } else if (role === 'user') {
-            html = `<div class="message player">${text} <span class="player-name">:나</span></div>`;
+            html = `
+                <div class="message player-container">
+                    <div class="message-bubble player">${text}</div>
+                </div>`;
         } else {
             html = `<div class="message system">${text}</div>`;
         }
@@ -118,10 +125,12 @@ $(document).ready(function () {
             playBeep(440, 0.1); // Low beep for user send
             $sendBtn.text('...');
             const typingHtml = `
-                <div class="message npc typing-msg">
-                    <span class="npc-name">지은:</span> 
-                    <div class="typing-indicator">
-                        <span></span><span></span><span></span>
+                <div class="message npc-container typing-msg">
+                    <div class="npc-name">지은</div>
+                    <div class="message-bubble npc">
+                        <div class="typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
                     </div>
                 </div>`;
             $chatLog.append(typingHtml);
