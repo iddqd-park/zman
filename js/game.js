@@ -1,6 +1,33 @@
 $(document).ready(function () {
     console.log("Game initialized.");
 
+    // Scenario Configuration
+    const scenarios = {
+        'kim_ji_eun': {
+            name: '김지은',
+            bg: 'area/minto/1.jpg',
+            char: 'npc_girl/kim_ji_eun/1.png',
+            systemMsg: '2002년 10월, 신촌 민들레영토.<br>당신은 지은과 마주보고 앉아있다.'
+        },
+        'lee_seo_hyun': {
+            name: '이서현',
+            bg: 'area/canmore/1.jpg',
+            char: 'npc_girl/lee_seo_hyun/1.png',
+            systemMsg: '2002년 5월, 신촌 캔모아.<br>그네 의자에 앉은 서현과 합석하게 되었다.'
+        },
+        'yoon_chae_rim': {
+            name: '윤채림',
+            bg: 'area/hongik_book/1.jpg',
+            char: 'npc_girl/yoon_chae_rim/1.png',
+            systemMsg: '2002년 11월, 홍익문고 앞.<br>누군가를 기다리는 채림에게 말을 걸었다.'
+        }
+    };
+
+    let currentScenarioId = 'kim_ji_eun';
+    let conversationHistory = []; // Array of {role: 'user'|'model', content: string}
+    let chatCount = 0;
+    let isGameOver = false;
+
     // Game Clock
     function updateGameClock() {
         const now = new Date();
@@ -16,7 +43,7 @@ $(document).ready(function () {
         hours = hours % 12;
         hours = hours ? hours : 12;
 
-        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시 ${minutes}분 ${seconds}초`;
+        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시 ${minutes}초`;
         $('#gameClock').text(timeString);
     }
 
@@ -31,21 +58,56 @@ $(document).ready(function () {
     const $userInput = $('#userInput');
     const $sendBtn = $('#sendBtn');
 
-    // State
-    let conversationHistory = []; // Array of {role: 'user'|'model', content: string}
-    let chatCount = parseInt(localStorage.getItem('zman_chat_count')) || 0;
-    let isGameOver = false;
+    // Initialize Game based on URL Parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const scenarioId = urlParams.get('scenario');
 
-    // Initialize
-    loadHistory();
-    $userInput.focus();
-
-    // Initial Load of Affinity & Check Game Over
-    const savedAffinity = localStorage.getItem('zman_affinity');
-    if (savedAffinity !== null) {
-        updateAffinity(savedAffinity);
+    if (scenarioId && scenarios[scenarioId]) {
+        initGame(scenarioId);
     } else {
-        updateAffinity(0); // Default start
+        // If no scenario or invalid, redirect to index (if not already there)
+        // Check if we are physically on play.php to avoid loop if index.php included this (it doesn't, but safe)
+        if (window.location.pathname.includes('play.php')) {
+            alert("잘못된 접근입니다. 캐릭터를 다시 선택해주세요.");
+            window.location.href = 'index.php';
+        }
+    }
+
+    function initGame(scenarioId) {
+        console.log("Starting scenario:", scenarioId);
+        currentScenarioId = scenarioId;
+        const data = scenarios[scenarioId];
+
+        // 1. Update Assets
+        $('#bgImage').attr('src', data.bg);
+        // 2. 동적 placeholder 적용 (200자 제한은 HTML 속성으로 이미 적용)
+        $('#userInput').attr('placeholder', `${data.name}에게 할말을 입력하세요`); $('#charImage').attr('src', data.char);
+
+        // 2. Reset Game State (New Session)
+        conversationHistory = [];
+        chatCount = 0;
+        isGameOver = false;
+        $('.character-layer').show();
+        // Placeholder for future character expression logic
+
+        // 3. Clear & Init Chat Log
+        $chatLog.empty();
+        $chatLog.append(`
+            <div class="message system">
+                <span class="badge bg-secondary">SYSTEM</span> ${data.systemMsg}
+            </div>
+        `);
+
+        // 4. Reset Affinity
+        updateAffinity(0);
+
+        // Clear Persistence for new game session
+        localStorage.removeItem('zman_history');
+        localStorage.removeItem('zman_affinity');
+        localStorage.removeItem('zman_chat_count');
+
+        // Focus Input
+        $userInput.focus();
     }
 
     // Event Listeners
@@ -71,16 +133,13 @@ $(document).ready(function () {
         }
     });
 
-    // Reset Game (Full Reset)
-    $('#resetGameBtn').on('click', function () {
-        if (confirm('정말로 모든 기억을 지우고 처음부터 다시 시작하시겠습니까?')) {
-            localStorage.removeItem('zman_history');
-            localStorage.removeItem('zman_affinity');
-            localStorage.removeItem('zman_chat_count');
-            location.reload();
+    // Return to Title (Replacing Reset Game)
+    $('#resetGameBtn').text('메인 화면으로'); // Update Text
+    $('#resetGameBtn').off('click').on('click', function () {
+        if (confirm('현재 대화를 종료하고 메인 화면으로 돌아가시겠습니까?')) {
+            window.location.href = 'index.php';
         }
     });
-
     async function sendMessage() {
         const text = $userInput.val().trim();
         if (text === "") return;
@@ -94,8 +153,9 @@ $(document).ready(function () {
 
         // Game Over Check
         if (isGameOver) {
+            const data = scenarios[currentScenarioId];
             setTimeout(() => {
-                appendMessage('system', '지은은 이제 더이상 민들레영토에 있지 않습니다. 당신의 대화를 들어줄 사람은 없습니다. 설정으로 들어가서 게임을 재시작 하세요.');
+                appendMessage('system', `${data.name}은(는) 이제 더이상 당신 곁에 있지 않습니다.`);
                 playBeep(220, 0.3); // Low sad beep
             }, 500);
             return;
@@ -105,6 +165,9 @@ $(document).ready(function () {
 
         // Increment Chat Count
         chatCount++;
+        // Note: We are NOT saving to localStorage for persistence in this session-based MVP 
+        // to avoid complexity with multi-scenario storage. 
+        // (Or we could overwrite the same keys, effectively supporting only 1 active game at a time)
         localStorage.setItem('zman_chat_count', chatCount);
 
         try {
@@ -115,7 +178,8 @@ $(document).ready(function () {
                 },
                 body: JSON.stringify({
                     message: text,
-                    history: conversationHistory.filter(msg => msg !== conversationHistory[conversationHistory.length - 1])
+                    history: conversationHistory,
+                    scenarioId: currentScenarioId // Pass ID
                 })
             });
 
@@ -278,16 +342,22 @@ $(document).ready(function () {
             $('.character-layer').hide(); // Hide character
             // We don't hide bg, just character
         } else {
-            $('.character-layer').show();
+            // Only show if we are IN game screen.
+            // But since this function is usually called during updateAffinity which happens during message exchange, we are likely in game.
+            if ($('#gameScreen').is(':visible')) {
+                $('.character-layer').show();
+            }
         }
     }
 
     function appendMessage(role, text) {
         let html = '';
+        const charName = scenarios[currentScenarioId].name;
+
         if (role === 'model') {
             html = `
                 <div class="message npc-container">
-                    <div class="npc-name">지은</div>
+                    <div class="npc-name">${charName}</div>
                     <div class="message-bubble npc">${text}</div>
                 </div>`;
         } else if (role === 'user') {
@@ -305,11 +375,7 @@ $(document).ready(function () {
 
     function addToHistory(role, content) {
         conversationHistory.push({ role: role, content: content });
-        saveHistory();
-    }
-
-    function saveHistory() {
-        // Enforce Byte Limit
+        // Enforce limit
         let json = JSON.stringify(conversationHistory);
         while (new Blob([json]).size > MAX_HISTORY_BYTES && conversationHistory.length > 0) {
             // Remove oldest message (try to remove pairs if possible to keep context sense, but strict byte limit means just shift)
@@ -319,31 +385,17 @@ $(document).ready(function () {
         localStorage.setItem('zman_history', json);
     }
 
-    function loadHistory() {
-        const saved = localStorage.getItem('zman_history');
-        if (saved) {
-            try {
-                conversationHistory = JSON.parse(saved);
-                conversationHistory.forEach(msg => {
-                    appendMessage(msg.role, msg.content);
-                });
-            } catch (e) {
-                console.error("Failed to parse history", e);
-                localStorage.removeItem('zman_history');
-            }
-        }
-    }
-
     function setLoading(isLoading) {
         $sendBtn.prop('disabled', isLoading);
         $userInput.prop('disabled', isLoading);
+        const charName = scenarios[currentScenarioId].name;
 
         if (isLoading) {
             playBeep(440, 0.1); // Low beep for user send
             $sendBtn.text('...');
             const typingHtml = `
                 <div class="message npc-container typing-msg">
-                    <div class="npc-name">지은</div>
+                    <div class="npc-name">${charName}</div>
                     <div class="message-bubble npc">
                         <div class="typing-indicator">
                             <span></span><span></span><span></span>
