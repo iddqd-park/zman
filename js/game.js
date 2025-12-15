@@ -74,7 +74,12 @@ $(document).ready(function () {
                     appendMessage('model', response.reply);
                     addToHistory('model', response.reply);
                 } else if (response.error) {
-                    appendMessage('system', "Error: " + response.error);
+                    let detailMsg = response.details;
+                    if (typeof detailMsg === 'object') {
+                        detailMsg = JSON.stringify(detailMsg);
+                    }
+                    appendMessage('system', `⛔ Error (${response.error}): ${detailMsg}`);
+                    console.error("API Error Details:", response.details);
                 }
             },
             error: function (xhr, status, error) {
