@@ -137,13 +137,45 @@ $(document).ready(function () {
        ========================================= */
     let bgmAudio = new Audio();
     let bgmIndex = 0;
-    let isBgmMuted = false;
+    // Load mute state from localStorage (default: false)
+    let isBgmMuted = localStorage.getItem('zman_bgm_muted') === 'true';
 
     // Shuffle Playlist
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function updateBgmButton() {
+        if (bgmAudio.paused) {
+            $('#bgmToggleBtn').text('🔇');
+        } else {
+            $('#bgmToggleBtn').text('🔊');
+        }
+    }
+
+    function tryPlayBgm() {
+        if (isBgmMuted) {
+            updateBgmButton();
+            return;
+        }
+
+        let playPromise = bgmAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                console.log("BGM started.");
+                updateBgmButton();
+            }).catch(error => {
+                console.log("BGM Autoplay prevented. Waiting for interaction.");
+                updateBgmButton(); // Show muted initially if blocked
+                // Add one-time listener to Resume
+                $(document).one('click keydown touchstart', function () {
+                    if (!bgmAudio.paused) return;
+                    bgmAudio.play().then(updateBgmButton);
+                });
+            });
         }
     }
 
@@ -154,40 +186,29 @@ $(document).ready(function () {
         bgmAudio.src = bgmPlaylist[bgmIndex];
         bgmAudio.volume = 0.3; // -10dB approx
 
-        // Autoplay attempt
-        let playPromise = bgmAudio.play();
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                // Autoplay started!
-                console.log("BGM Autoplay started.");
-            }).catch(error => {
-                // Autoplay was prevented
-                console.log("BGM Autoplay prevented. Waiting for user interaction.");
-                // Add one-time click listener to body to start music
-                $(document).one('click', function () {
-                    if (!bgmAudio.paused) return;
-                    bgmAudio.play();
-                });
-            });
-        }
+        tryPlayBgm();
 
         // Loop Logic
         bgmAudio.addEventListener('ended', function () {
             bgmIndex = (bgmIndex + 1) % bgmPlaylist.length;
             bgmAudio.src = bgmPlaylist[bgmIndex];
-            bgmAudio.play();
+            if (!isBgmMuted) {
+                bgmAudio.play().catch(e => console.log("Loop play failed", e));
+            }
         });
     }
 
     // Toggle Button
     $('#bgmToggleBtn').on('click', function () {
         if (bgmAudio.paused) {
-            bgmAudio.play();
-            $(this).text('🔊');
+            isBgmMuted = false;
+            bgmAudio.play().then(updateBgmButton);
         } else {
+            isBgmMuted = true;
             bgmAudio.pause();
-            $(this).text('🔇');
+            updateBgmButton();
         }
+        localStorage.setItem('zman_bgm_muted', isBgmMuted);
     });
 
 
