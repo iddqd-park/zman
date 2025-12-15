@@ -20,7 +20,7 @@
         <div class="col-lg-8 col-xl-9 col-12 visual-area-wrapper d-flex align-items-center justify-content-center">
             <div class="game-stage position-relative text-center">
                 <img src="area/minto/1.jpg" alt="배경" class="background-img">
-                <div class="character-layer text-center">
+                <div class="character-layer text-center" style="display: none;">
                     <img src="npc_girl/kim_ji_eun/1.png" alt="김지은" class="character-sprite">
                 </div>
                 <div id="affinityDisplay" class="position-absolute bottom-0 end-0 p-3" style="z-index: 10;"></div>
