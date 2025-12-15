@@ -7,19 +7,19 @@ $(document).ready(function () {
             name: '김지은',
             bg: 'area/minto/1.jpg',
             char: 'npc_girl/kim_ji_eun/1.png',
-            systemMsg: '2002년 10월, 신촌 민들레영토.<br>당신은 지은과 마주보고 앉아있다.'
+            systemMsg: '신촌 민들레영토.<br>당신은 지은과 마주보고 앉아있다.'
         },
         'lee_seo_hyun': {
             name: '이서현',
             bg: 'area/canmore/1.jpg',
             char: 'npc_girl/lee_seo_hyun/1.png',
-            systemMsg: '2002년 5월, 신촌 캔모아.<br>그네 의자에 앉은 서현과 합석하게 되었다.'
+            systemMsg: '신촌 캔모아.<br>그네 의자에 앉은 서현과 합석하게 되었다.'
         },
         'yoon_chae_rim': {
             name: '윤채림',
             bg: 'area/hongik_book/1.jpg',
             char: 'npc_girl/yoon_chae_rim/1.png',
-            systemMsg: '2002년 11월, 홍익문고 앞.<br>누군가를 기다리는 채림에게 말을 걸었다.'
+            systemMsg: '홍익문고 앞.<br>누군가를 기다리는 채림에게 말을 걸었다.'
         }
     };
 
@@ -43,7 +43,7 @@ $(document).ready(function () {
         hours = hours % 12;
         hours = hours ? hours : 12;
 
-        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시 ${minutes}초`;
+        const timeString = `${year}년 ${month}월 ${date}일 ${ampm} ${hours}시 ${minutes}분`;
         $('#gameClock').text(timeString);
     }
 
@@ -436,4 +436,13 @@ $(document).ready(function () {
     function scrollToBottom() {
         $chatLog.scrollTop($chatLog[0].scrollHeight);
     }
+
+    // Expose Debug Function
+    window.debugChat = function () {
+        console.log("=== Debug: Conversation History ===");
+        console.table(conversationHistory);
+        console.log("Current Scenario:", currentScenarioId);
+        console.log("Raw History Array:", JSON.stringify(conversationHistory, null, 2));
+        console.log("===================================");
+    };
 });

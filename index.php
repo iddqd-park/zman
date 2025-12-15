@@ -17,9 +17,11 @@
     <!-- Intro Screen -->
     <div id="introScreen" class="container-fluid min-vh-100 py-5 d-flex flex-column align-items-center justify-content-center bg-dark text-white position-relative" style="z-index: 2000;">
         <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold mb-3 intro-title">2002 신촌, 그녀와의 만남</h1>
-            <span class="badge bg-danger fs-6 mb-3">MVP alpha</span>
-            <p class="lead text-light opacity-75">그 시절, 우리가 사랑했던 그녀들의 마음을 얻어보세요.</p>
+            <h1 class="display-4 fw-bold mb-4 intro-title">ZMAN</h1>
+            <h2 class="lead text-light mb-4">2002년 신촌으로의 시간여행, 국내 최초 LLM NPC 미연시</h2>
+            <p class="small text-white-50 mx-auto" style="max-width: 600px;">
+                기본적인 대화만 제공하는 MVP 테스트 버전입니다. 회원가입은 필요 없으며, 대화 내용은 서버에 저장되지 않고 브라우저 창을 닫으면 초기화 됩니다. 버그 리포팅 및 각종 의견은 X (Twitter) 및 Threads를 통해서 연락 부탁드려요.
+            </p>
         </div>
 
         <div class="row g-4 justify-content-center w-100 px-3" style="max-width: 1200px;">
@@ -75,7 +77,7 @@
                 <a href="https://www.threads.net/@iddqd.park" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">Threads</a>
             </div>
             <p class="mt-3 text-white-50 small">
-                <a href="https://iddqd.kr" target="_blank" class="text-white-50 text-decoration-none">IDDQD 인터넷 제공</a>
+                <a href="https://iddqd.kr" target="_blank" class="text-white-50 text-decoration-none footer-link">IDDQD 인터넷 제공</a>
             </p>
         </div>
     </div>

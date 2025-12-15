@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2002 신촌, 그녀와의 만남</title>
+    <title>ZMAN</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -32,7 +32,7 @@
             <div class="col-lg-4 col-xl-3 col-12 chat-interface d-flex flex-column">
                 <!-- Chat Header -->
                 <div class="chat-header p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
-                    <span class="fw-bold ms-2" id="gameClock">2002년 12월 15일 오후 ?시 ?분</span>
+                    <span class="fw-bold ms-2" id="gameClock"></span>
                     <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
                         ⚙️ 설정
                     </button>
@@ -41,8 +41,7 @@
                 <!-- Game/Dialogue Log -->
                 <div class="chat-log flex-grow-1 p-3" id="chatLog">
                     <div class="message system">
-                        <span class="badge bg-secondary">SYSTEM</span> 2002년 10월, 신촌 민들레영토.<br>
-                        당신은 지은과 마주보고 앉아있다.
+                        <span class="badge bg-secondary">SYSTEM</span> 신촌 민들레영토에서 당신은 지은과 마주보고 앉아있다.
                     </div>
                     <!-- Messages will be appended here -->
                 </div>

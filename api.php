@@ -47,6 +47,8 @@ $scenarioId = $data['scenarioId'] ?? 'kim_ji_eun';
 // Get history
 $history = $data['history'] ?? [];
 
+
+
 // Common Output Format (Appended to all personas)
 $outputFormat = <<<EOT
 
@@ -56,6 +58,12 @@ You MUST respond in strict JSON format with the following schema:
     "reply": "string (your response text)",
     "affinity": 0 (integer 0 to 5, current romantic interest level)
 }
+
+# System Rules
+1. DO NOT invent or guess the user's name (e.g., 'Jinwoo', 'Minsu') under any circumstances.
+2. If the user has not revealed their name, refer to them as '저기요', '그쪽', or simply omit the name.
+3. If the user refuses to answer a question (e.g., "IDK", "None of your business"), respect that and move the conversation forward naturally.
+4. STRICTLY adhere to the JSON format above.
 EOT;
 
 // 1. Kim Ji-eun (Minto)
@@ -185,17 +193,23 @@ foreach ($history as $msg) {
     $content = $msg['content'] ?? '';
 
     // Sanitize USER content
-    if ($role === 'user') {
-        // Remove unwanted special characters
+
+        $beforePreg = $content;
         $content = preg_replace('/[\[\]{}\\\/]/', ' ', $content);
+        if ($content === null) {
+             $content = $beforePreg; // Fallback
+        }
+
         $content = trim($content);
+        
         // Length limit
         if (function_exists('mb_substr')) {
             $content = mb_substr($content, 0, 300);
         } else {
             $content = substr($content, 0, 300);
         }
-    }
+        
+
 
     $contents[] = [
         'role' => $role,
@@ -240,5 +254,5 @@ curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) {
 });
 
 ignore_user_abort(true);
-curl_exec($ch);
+
 curl_close($ch);

@@ -344,3 +344,11 @@ body.game-body {
         font-size: 2.5rem;
     }
 }
+/* Footer Link Hover */
+.footer-link {
+    transition: all 0.2s ease;
+}
+.footer-link:hover {
+    text-decoration: underline !important;
+    color: #ffffff !important;
+}
