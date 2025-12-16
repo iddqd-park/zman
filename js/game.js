@@ -115,7 +115,7 @@ $(document).ready(function () {
         `);
 
         // 4. Reset Affinity
-        updateAffinity(0);
+        updateAffinity(0, false);
 
         // Clear Persistence for new game session
         localStorage.removeItem('zman_history');
@@ -380,9 +380,14 @@ $(document).ready(function () {
         }
     }
 
-    function updateAffinity(score) {
+    function updateAffinity(score, animate = true) {
         // Clamp score 0-5
         let rawScore = Math.max(0, Math.min(5, parseInt(score) || 0));
+
+        // Get previous score for comparison
+        let previousScore = parseInt(localStorage.getItem('zman_affinity'));
+        if (isNaN(previousScore)) previousScore = 0;
+
         localStorage.setItem('zman_affinity', rawScore); // Save real score persistence
 
         // Game Over Check
@@ -396,8 +401,7 @@ $(document).ready(function () {
             setGameOver(false);
         }
 
-        // Display Logic (Masking)
-        // If chatCount <= 10, display at least 1 heart unless actual score is >= 2
+        // Masking Logic (Render FIRST)
         let displayScore = rawScore;
         if (chatCount <= 10) {
             if (displayScore < 1) {
@@ -417,7 +421,36 @@ $(document).ready(function () {
             }
         }
 
-        $('#affinityDisplay').html(heartsHtml);
+        // Update DOM
+        const $affinityDisplay = $('#affinityDisplay');
+        $affinityDisplay.html(heartsHtml);
+
+        // Animation & SFX Logic (After DOM Update)
+        if (animate && rawScore !== previousScore) {
+            console.log(`Affinity Changed: ${previousScore} -> ${rawScore}. Triggering Animation.`);
+
+            // Clean slate
+            $affinityDisplay.removeClass('anim-shake anim-burst');
+
+            // Double RAF to ensure repaint before adding class
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (rawScore < previousScore) {
+                        // Decrease: Shake (Earthquake)
+                        console.log("Applying anim-shake");
+                        $affinityDisplay.addClass('anim-shake');
+                        playBeep(100, 0.4); // Low rumble beep
+                        playBeep(150, 0.4); // Harmonic
+                    } else if (rawScore > previousScore) {
+                        // Increase: Burst (Light)
+                        console.log("Applying anim-burst");
+                        $affinityDisplay.addClass('anim-burst');
+                        playBeep(1000, 0.1); // High sparkle
+                        setTimeout(() => playBeep(1500, 0.2), 100);
+                    }
+                });
+            });
+        }
     }
 
     function setGameOver(state) {
