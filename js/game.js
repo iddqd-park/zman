@@ -26,6 +26,7 @@ $(document).ready(function () {
     let currentScenarioId = 'kim_ji_eun';
     let conversationHistory = []; // Array of {role: 'user'|'model', content: string}
     let chatCount = 0;
+    let zeroAffinityCount = 0; // Track consecutive turns with 0 affinity
     let isGameOver = false;
     let gameTime = null; // Variable to hold the game's current time
 
@@ -94,7 +95,9 @@ $(document).ready(function () {
             history: conversationHistory,
             affinity: parseInt(localStorage.getItem('zman_affinity') || 0),
             chatCount: chatCount,
-            gameTime: gameTime ? gameTime.getTime() : null
+            gameTime: gameTime ? gameTime.getTime() : null,
+            isGameOver: isGameOver,
+            zeroAffinityCount: zeroAffinityCount
         };
         localStorage.setItem(getSaveKey(), JSON.stringify(state));
         // console.log("Game state saved.");
@@ -143,6 +146,7 @@ $(document).ready(function () {
             console.log("Resuming saved game...");
             conversationHistory = savedState.history || [];
             chatCount = savedState.chatCount || 0;
+            zeroAffinityCount = savedState.zeroAffinityCount || 0;
 
             // Restore Time
             if (savedState.gameTime) {
@@ -175,9 +179,16 @@ $(document).ready(function () {
             // Restore Affinity
             updateAffinity(savedState.affinity, false);
 
-            isGameOver = false; // Assume not game over unless we store that too. For now reset.
-            $('.character-layer').show();
-            // If we tracked game over state, restore it here.
+            if (savedState.isGameOver) {
+                isGameOver = true;
+                setGameOver(true, true); // Hide everything if game was over
+                // If it was minpro event, we might want to ensure the last state is visually correct, 
+                // but standard Game Over UI hides input and shows exit button, which is enough.
+                // The history log will show what happened.
+            } else {
+                isGameOver = false;
+                $('.character-layer').show();
+            }
 
         } else {
             console.log("Starting new game...");
@@ -190,6 +201,7 @@ $(document).ready(function () {
             // 2. Reset Game State (New Session)
             conversationHistory = [];
             chatCount = 0;
+            zeroAffinityCount = 0;
             isGameOver = false;
             $('.character-layer').show();
 
@@ -329,6 +341,13 @@ $(document).ready(function () {
 
         // Increment Chat Count
         chatCount++;
+
+        // Minpro Event Trigger (60 turns)
+        if (chatCount >= 60) {
+            setLoading(false);
+            triggerMinproEvent();
+            return;
+        }
 
         // Increment Game Time by 1 minute
         if (gameTime) {
@@ -484,14 +503,25 @@ $(document).ready(function () {
         let rawScore = Math.max(0, Math.min(5, parseInt(score) || 0));
         localStorage.setItem('zman_affinity', rawScore);
 
+        // Update Consecutive Count
+        if (rawScore <= 0) {
+            zeroAffinityCount++;
+        } else {
+            zeroAffinityCount = 0;
+        }
+
         // Game Over Check
-        if (chatCount > 10 && rawScore <= 0) {
+        // Game Over Check (Affinity) - Only if NOT Minpro event range (>60 turns)
+        // And only if consecutive 0 affinity reached 5
+        if (chatCount > 10 && zeroAffinityCount >= 5 && chatCount < 60) {
             if (!isGameOver) {
                 const charName = scenarios[currentScenarioId].name;
                 appendMessage('system', `더 이상 대화를 이어갈 수 없다고 판단한 ${charName}은(는) 자리를 떠났다.`);
+                addToHistory('system', `더 이상 대화를 이어갈 수 없다고 판단한 ${charName}은(는) 자리를 떠났다.`);
                 setGameOver(true);
+                saveGameState();
             }
-        } else {
+        } else if (chatCount < 60) {
             setGameOver(false);
         }
 
@@ -543,12 +573,14 @@ $(document).ready(function () {
         }
     }
 
-    function setGameOver(state) {
+    function setGameOver(state, hideCharacter = true) {
         isGameOver = state;
         const $inputGroup = $userInput.parent(); // Assuming userInput is inside a group or container
 
         if (state) {
-            $('.character-layer').hide(); // Hide character
+            if (hideCharacter) {
+                $('.character-layer').hide(); // Hide character
+            }
 
             // Hide Input and Send Button
             $userInput.hide();
@@ -581,7 +613,7 @@ $(document).ready(function () {
 
             // Bind Click
             $('#gameOverHomeBtn').on('click', function () {
-                resetAndExit();
+                confirmExit();
             });
 
         } else {
@@ -601,9 +633,9 @@ $(document).ready(function () {
     }
 
     // Expose Debug Function
-    function appendMessage(role, text) {
+    function appendMessage(role, text, nameOverride = null) {
         let html = '';
-        const charName = scenarios[currentScenarioId].name;
+        const charName = nameOverride || scenarios[currentScenarioId].name;
 
         if (role === 'model') {
             html = `
@@ -693,7 +725,85 @@ $(document).ready(function () {
         console.log("=== Debug: Conversation History ===");
         console.table(conversationHistory);
         console.log("Current Scenario:", currentScenarioId);
+        console.log("Chat Count:", chatCount);
+        console.log("Zero Affinity Count:", zeroAffinityCount);
         console.log("Raw History Array:", JSON.stringify(conversationHistory, null, 2));
         console.log("===================================");
     };
+
+    window.setTurnCount = function (n) {
+        chatCount = n;
+
+        // Reset time to base (10:00 AM) + n minutes
+        gameTime = new Date();
+        gameTime.setFullYear(gameTime.getFullYear() - 23);
+        gameTime.setHours(10, 0, 0, 0); // Base time
+        gameTime.setMinutes(gameTime.getMinutes() + n); // Add turns
+
+        updateGameClock();
+
+        console.log(`Turn count set to: ${chatCount}, Time updated to: ${$('#gameClock').text()}`);
+    };
+
+    window.setAffinity = function (n) {
+        updateAffinity(n);
+        console.log(`Affinity set to: ${n}`);
+    };
+    // Minpro Event Function
+    async function triggerMinproEvent() {
+        console.log("Minpro Event Triggered!");
+
+        // 1. Game Ends (UI blocks, but keep character visible for fade out)
+        setGameOver(true, false);
+
+        const $charImage = $('#charImage');
+
+        // 2. Girl Fade Out
+        await fadeCanvas($charImage, 0);
+
+        // 3. Swap Image
+        $charImage.attr('src', 'npc_enemy/min/1.png');
+
+        // 4. Minpro Fade In
+        await fadeCanvas($charImage, 1);
+
+        // 5. System Message
+        const msg1 = '신촌을 지배하는 알파메일 민프로가 나타났다. 그는 이쪽을 힐끔 보더니 거침없이 걸어온다.';
+        appendMessage('system', msg1);
+        addToHistory('system', msg1);
+        saveGameState();
+        await delay(2000);
+
+        // 6. Dialogue
+        const msg2 = '어이 뭐야 이 꼴뚜기 같은 찐따 녀석은, 감히 이 몸의 여자에게 추근대다니. 이번엔 특별히 봐주지만 앞으로는 조심하라고.';
+        appendMessage('model', msg2, '민프로');
+        addToHistory('model', msg2); // Using 'model' role, but normally addToHistory doesn't support name override. 
+        // We might need to handle context. For simplicity, just add.
+        saveGameState();
+        await delay(4000);
+
+        // 7. Minpro Fade Out
+        await fadeCanvas($charImage, 0);
+
+        // 8. Final Message
+        const msg3 = '민프로는 여자를 데리고 가버렸다.';
+        appendMessage('system', msg3);
+        addToHistory('system', msg3);
+
+        saveGameState(); // Final state save
+    }
+
+    function fadeCanvas($el, opacity) {
+        return new Promise(resolve => {
+            if (opacity === 0) {
+                $el.fadeOut(1000, resolve);
+            } else {
+                $el.fadeIn(1000, resolve);
+            }
+        });
+    }
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 });
