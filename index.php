@@ -72,7 +72,7 @@
         </div>
 
         <div class="mt-5 text-center">
-             <div class="d-flex gap-3 justify-content-center">
+             <div class="d-flex gap-3 justify-content-center flex-wrap">
                 <a href="https://iddqd.kr" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">Homepage</a>
                 <a href="https://x.com/iddqd_park" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">X (Twitter)</a>
                 <a href="https://www.threads.net/@iddqd.park" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-4">Threads</a>
