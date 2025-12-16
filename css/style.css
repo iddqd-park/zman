@@ -435,3 +435,22 @@ body.game-body {
     text-decoration: underline !important;
     color: #ffffff !important;
 }
+
+/* Blink Warning Animation */
+@keyframes blink-warning {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.blink-warning {
+    animation: blink-warning 1s infinite alternate;
+}

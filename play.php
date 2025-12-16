@@ -44,11 +44,15 @@
                         </button>
                     </div>
                 </div>
+                <!-- Time Battery Bar -->
+                <div class="time-bar-container" style="height: 6px; width: 100%; background: #e9ecef;">
+                    <div id="timeBar" style="height: 100%; width: 100%; background-color: #28a745; transition: width 0.5s linear, background-color 0.5s;"></div>
+                </div>
 
                 <!-- Game/Dialogue Log -->
                 <div class="chat-log flex-grow-1 p-3" id="chatLog">
                     <div class="message system">
-                        <span class="badge bg-secondary">SYSTEM</span> 신촌 민들레영토에서 당신은 지은과 마주보고 앉아있다.
+                        신촌 민들레영토에서 당신은 지은과 마주보고 앉아있다.
                     </div>
                     <!-- Messages will be appended here -->
                 </div>

@@ -62,6 +62,37 @@ $(document).ready(function () {
     // No setInterval, only update on init and interaction
     // updateGameClock(); // Will be called in initGame
 
+    function updateTimeBar() {
+        // Total turns: 60
+        // Calculate percentage (starts at 100%, goes to 0%)
+        const maxTurns = 60;
+        const currentTurns = Math.min(chatCount, maxTurns);
+        const percentage = Math.max(0, ((maxTurns - currentTurns) / maxTurns) * 100);
+
+        const $bar = $('#timeBar');
+        $bar.css('width', percentage + '%');
+
+        // Color Logic
+        $bar.removeClass('bg-success bg-warning bg-danger');
+
+        // Remove inline background-color to let classes or direct css work better, 
+        // but for smooth transition we might use direct rgb or just swap classes.
+        // Let's use direct CSS for specific colors requested: Green -> Orange -> Red
+
+        let color = '#28a745'; // Green
+        if (percentage <= 20) {
+            color = '#dc3545'; // Red
+            $bar.addClass('blink-warning');
+        } else {
+            $bar.removeClass('blink-warning');
+            if (percentage <= 50) {
+                color = '#fd7e14'; // Orange
+            }
+        }
+
+        $bar.css('background-color', color);
+    }
+
     // settings
     const MAX_HISTORY_BYTES = 10000; // 10KB limit
 
@@ -164,7 +195,7 @@ $(document).ready(function () {
             // Always show system msg at top
             $chatLog.append(`
                 <div class="message system">
-                    <span class="badge bg-secondary">SYSTEM</span> ${data.systemMsg}
+                    ${data.systemMsg}
                 </div>
             `);
             // Add restoration message
@@ -209,18 +240,19 @@ $(document).ready(function () {
             $chatLog.empty();
             $chatLog.append(`
                 <div class="message system">
-                    <span class="badge bg-secondary">SYSTEM</span> ${data.systemMsg}
+                    ${data.systemMsg}
                 </div>
             `);
 
             // 4. Reset Affinity
             updateAffinity(0, false);
 
-            // Clear Persistence for new game session (legacy keys)
-            localStorage.removeItem('zman_history');
             localStorage.removeItem('zman_affinity');
             localStorage.removeItem('zman_chat_count');
         }
+
+        // Init Time Bar
+        updateTimeBar();
 
         // Focus Input
         $userInput.focus();
@@ -354,6 +386,8 @@ $(document).ready(function () {
             gameTime.setMinutes(gameTime.getMinutes() + 1);
             updateGameClock(); // Update UI immediately
         }
+
+        updateTimeBar();
 
         saveGameState(); // SAVE STATE
 
@@ -741,6 +775,7 @@ $(document).ready(function () {
         gameTime.setMinutes(gameTime.getMinutes() + n); // Add turns
 
         updateGameClock();
+        updateTimeBar();
 
         console.log(`Turn count set to: ${chatCount}, Time updated to: ${$('#gameClock').text()}`);
     };
@@ -763,6 +798,17 @@ $(document).ready(function () {
 
         // 3. Swap Image
         $charImage.attr('src', 'npc_enemy/min/1.png');
+
+        // Stop Main BGM
+        if (bgmAudio) {
+            bgmAudio.pause();
+        }
+
+        // Play Special Game Over BGM
+        const specialBgm = new Audio('bgm_special/gameover.mp3');
+        specialBgm.volume = 0.5;
+        specialBgm.loop = false;
+        specialBgm.play().catch(e => console.error("Special BGM play failed", e));
 
         // 4. Minpro Fade In
         await fadeCanvas($charImage, 1);
