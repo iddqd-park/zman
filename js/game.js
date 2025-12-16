@@ -65,7 +65,7 @@ $(document).ready(function () {
     function updateTimeBar() {
         // Total turns: 60
         // Calculate percentage (starts at 100%, goes to 0%)
-        const maxTurns = 60;
+        const maxTurns = 30;
         const currentTurns = Math.min(chatCount, maxTurns);
         const percentage = Math.max(0, ((maxTurns - currentTurns) / maxTurns) * 100);
 
@@ -374,8 +374,8 @@ $(document).ready(function () {
         // Increment Chat Count
         chatCount++;
 
-        // Minpro Event Trigger (60 turns)
-        if (chatCount >= 60) {
+        // Minpro Event Trigger (30 turns)
+        if (chatCount >= 30) {
             setLoading(false);
             triggerMinproEvent();
             return;
@@ -545,9 +545,9 @@ $(document).ready(function () {
         }
 
         // Game Over Check
-        // Game Over Check (Affinity) - Only if NOT Minpro event range (>60 turns)
+        // Game Over Check (Affinity) - Only if NOT Minpro event range (>30 turns)
         // And only if consecutive 0 affinity reached 5
-        if (chatCount > 10 && zeroAffinityCount >= 5 && chatCount < 60) {
+        if (chatCount > 10 && zeroAffinityCount >= 5 && chatCount < 30) {
             if (!isGameOver) {
                 const charName = scenarios[currentScenarioId].name;
                 appendMessage('system', `더 이상 대화를 이어갈 수 없다고 판단한 ${charName}은(는) 자리를 떠났다.`);
@@ -555,7 +555,7 @@ $(document).ready(function () {
                 setGameOver(true);
                 saveGameState();
             }
-        } else if (chatCount < 60) {
+        } else if (chatCount < 30) {
             setGameOver(false);
         }
 
