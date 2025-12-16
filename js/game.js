@@ -31,13 +31,11 @@ $(document).ready(function () {
 
     function updateGameClock() {
         if (!gameTime) {
-            // If gameTime is not initialized, use current real time as a fallback
-            // But we want 2002 environment, so let's subtract 23 years from current time
+            // Default Start: 10:00 AM
+            // We want 2002 environment, so let's subtract 23 years from current time roughly or just fixed date
             gameTime = new Date();
             gameTime.setFullYear(gameTime.getFullYear() - 23);
-        } else {
-            // Increment gameTime by 1 second
-            gameTime.setSeconds(gameTime.getSeconds() + 1);
+            gameTime.setHours(10, 0, 0, 0);
         }
 
         const now = gameTime;
@@ -46,19 +44,22 @@ $(document).ready(function () {
         const month = now.getMonth() + 1;
         const date = now.getDate();
         let hours = now.getHours();
+        // const minutes = now.getMinutes(); // Not used directly in string construction below but good to have
         const minutes = now.getMinutes();
-        const seconds = now.getSeconds();
         const ampm = hours >= 12 ? '오후' : '오전';
 
         hours = hours % 12;
         hours = hours ? hours : 12;
 
-        const timeString = `${year}.${month}.${date} ${ampm} ${hours}시`;
+        // Pad minutes
+        const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+
+        const timeString = `${year}.${month}.${date} ${ampm} ${hours}시 ${minutesStr}분`;
         $('#gameClock').text(timeString);
     }
 
-    setInterval(updateGameClock, 1000);
-    updateGameClock(); // Initial call
+    // No setInterval, only update on init and interaction
+    // updateGameClock(); // Will be called in initGame
 
     // settings
     const MAX_HISTORY_BYTES = 10000; // 10KB limit
@@ -83,44 +84,131 @@ $(document).ready(function () {
         }
     }
 
+    // State Management
+    function getSaveKey() {
+        return `zman_save_data_${currentScenarioId}`;
+    }
+
+    function saveGameState() {
+        const state = {
+            history: conversationHistory,
+            affinity: parseInt(localStorage.getItem('zman_affinity') || 0),
+            chatCount: chatCount,
+            gameTime: gameTime ? gameTime.getTime() : null
+        };
+        localStorage.setItem(getSaveKey(), JSON.stringify(state));
+        // console.log("Game state saved.");
+    }
+
+    function loadGameState() {
+        const json = localStorage.getItem(getSaveKey());
+        if (!json) return null;
+        try {
+            return JSON.parse(json);
+        } catch (e) {
+            console.error("Failed to parse save state", e);
+            return null;
+        }
+    }
+
+    function resetAndExit() {
+        localStorage.removeItem(getSaveKey());
+        localStorage.removeItem('zman_affinity'); // Clear shared keys if any
+        localStorage.removeItem('zman_chat_count');
+        localStorage.removeItem('zman_history');
+        window.location.href = './';
+    }
+
+    // Global exposed for onclick
+    window.confirmExit = function () {
+        if (confirm('대화 내용이 초기화됩니다. 괜찮으시겠습니까?')) {
+            resetAndExit();
+        }
+    };
+
     function initGame(scenarioId) {
         console.log("Starting scenario:", scenarioId);
         currentScenarioId = scenarioId;
         const data = scenarios[scenarioId];
 
-        // 0. Initialize Game Clock (10:00 AM)
-        gameTime = new Date();
-        gameTime.setFullYear(gameTime.getFullYear() - 23);
-        gameTime.setHours(10, 0, 0, 0);
-        updateGameClock();
-
-        // 1. Update Assets
+        // Load Assets
         $('#bgImage').attr('src', data.bg);
-        // 2. 동적 placeholder 적용 (200자 제한은 HTML 속성으로 이미 적용)
-        $('#userInput').attr('placeholder', `${data.name}에게 할말을 입력하세요`); $('#charImage').attr('src', data.char);
+        $('#userInput').attr('placeholder', `${data.name}에게 할말을 입력하세요`);
+        $('#charImage').attr('src', data.char);
 
-        // 2. Reset Game State (New Session)
-        conversationHistory = [];
-        chatCount = 0;
-        isGameOver = false;
-        $('.character-layer').show();
-        // Placeholder for future character expression logic
+        // Try Load State
+        const savedState = loadGameState();
 
-        // 3. Clear & Init Chat Log
-        $chatLog.empty();
-        $chatLog.append(`
-            <div class="message system">
-                <span class="badge bg-secondary">SYSTEM</span> ${data.systemMsg}
-            </div>
-        `);
+        if (savedState) {
+            console.log("Resuming saved game...");
+            conversationHistory = savedState.history || [];
+            chatCount = savedState.chatCount || 0;
 
-        // 4. Reset Affinity
-        updateAffinity(0, false);
+            // Restore Time
+            if (savedState.gameTime) {
+                gameTime = new Date(savedState.gameTime);
+            } else {
+                // Fallback if missing in save
+                gameTime = new Date();
+                gameTime.setFullYear(gameTime.getFullYear() - 23);
+                gameTime.setHours(10, 0, 0, 0);
+            }
+            updateGameClock();
 
-        // Clear Persistence for new game session
-        localStorage.removeItem('zman_history');
-        localStorage.removeItem('zman_affinity');
-        localStorage.removeItem('zman_chat_count');
+            // Restore Chat Log
+            $chatLog.empty();
+            // Always show system msg at top
+            $chatLog.append(`
+                <div class="message system">
+                    <span class="badge bg-secondary">SYSTEM</span> ${data.systemMsg}
+                </div>
+            `);
+            // Add restoration message
+            $chatLog.append(`<div class="message system text-muted small mt-1 mb-1">- 지난 대화를 불러왔습니다 -</div>`);
+
+            // Replay history
+            conversationHistory.forEach(msg => {
+                appendMessage(msg.role, msg.content, false); // false to skip auto-scrolling during bulk load if desired, but here we want it
+            });
+            scrollToBottom();
+
+            // Restore Affinity
+            updateAffinity(savedState.affinity, false);
+
+            isGameOver = false; // Assume not game over unless we store that too. For now reset.
+            $('.character-layer').show();
+            // If we tracked game over state, restore it here.
+
+        } else {
+            console.log("Starting new game...");
+            // 0. Initialize Game Clock (10:00 AM)
+            gameTime = new Date();
+            gameTime.setFullYear(gameTime.getFullYear() - 23);
+            gameTime.setHours(10, 0, 0, 0);
+            updateGameClock();
+
+            // 2. Reset Game State (New Session)
+            conversationHistory = [];
+            chatCount = 0;
+            isGameOver = false;
+            $('.character-layer').show();
+
+            // 3. Clear & Init Chat Log
+            $chatLog.empty();
+            $chatLog.append(`
+                <div class="message system">
+                    <span class="badge bg-secondary">SYSTEM</span> ${data.systemMsg}
+                </div>
+            `);
+
+            // 4. Reset Affinity
+            updateAffinity(0, false);
+
+            // Clear Persistence for new game session (legacy keys)
+            localStorage.removeItem('zman_history');
+            localStorage.removeItem('zman_affinity');
+            localStorage.removeItem('zman_chat_count');
+        }
 
         // Focus Input
         $userInput.focus();
@@ -241,10 +329,14 @@ $(document).ready(function () {
 
         // Increment Chat Count
         chatCount++;
-        // Note: We are NOT saving to localStorage for persistence in this session-based MVP 
-        // to avoid complexity with multi-scenario storage. 
-        // (Or we could overwrite the same keys, effectively supporting only 1 active game at a time)
-        localStorage.setItem('zman_chat_count', chatCount);
+
+        // Increment Game Time by 1 minute
+        if (gameTime) {
+            gameTime.setMinutes(gameTime.getMinutes() + 1);
+            updateGameClock(); // Update UI immediately
+        }
+
+        saveGameState(); // SAVE STATE
 
         try {
             // Get current game time string
@@ -366,6 +458,9 @@ $(document).ready(function () {
                 if (typeof result.affinity !== 'undefined') {
                     updateAffinity(result.affinity);
                 }
+
+                saveGameState(); // SAVE STATE after response
+
             } catch (e) {
                 console.error("JSON Parse Error:", e, "Accumulated:", accumulatedJson, "Raw Response:", fullRawCapture);
                 appendMessage('system', "⛔ ERROR: 다시 채팅을 입력해주세요. (JSON 처리 실패)");
@@ -486,7 +581,7 @@ $(document).ready(function () {
 
             // Bind Click
             $('#gameOverHomeBtn').on('click', function () {
-                window.location.href = './';
+                resetAndExit();
             });
 
         } else {
@@ -506,16 +601,6 @@ $(document).ready(function () {
     }
 
     // Expose Debug Function
-    window.debugChat = function () {
-        console.log("=== Debug: Conversation History ===");
-        console.table(conversationHistory);
-        console.log("Current Scenario:", currentScenarioId);
-        console.log("Raw History Array:", JSON.stringify(conversationHistory, null, 2));
-        console.log("===================================");
-    };
-
-
-
     function appendMessage(role, text) {
         let html = '';
         const charName = scenarios[currentScenarioId].name;

@@ -39,7 +39,7 @@
                             🔊
                         </button>
 
-                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="if(confirm('정말 나가시겠습니까?')) location.href='./'">
+                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="confirmExit()">
                             🚪 나가기
                         </button>
                     </div>
