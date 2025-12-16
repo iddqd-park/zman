@@ -426,7 +426,7 @@ $(document).ready(function () {
 
         // 6. Animation (Only if Visual Score Changed)
         if (animate && displayScore !== prevDisplayScore) {
-            console.log(`Visual Affinity Changed: ${prevDisplayScore} -> ${displayScore}. Triggering Animation.`);
+            //console.log(`Visual Affinity Changed: ${prevDisplayScore} -> ${displayScore}. Triggering Animation.`);
 
             $affinityDisplay.removeClass('anim-shake anim-burst');
 
