@@ -13,7 +13,13 @@
 - **PHP Proxy**: Gemini API 호출을 위한 PHP 프록시가 존재하지만, 단순 중계 역할만 수행하며 데이터를 저장하지 않습니다.
 - **보안**: 사용자의 개인정보를 수집하지 않는 안전한 구조입니다.
 
-## 🕹️ 게임 스토리 및 주요 특징
+## � 플레이 영상 (Gameplay)
+
+[![ZMAN Gameplay](https://img.youtube.com/vi/NEu5MJt3gVU/hqdefault.jpg)](https://www.youtube.com/shorts/NEu5MJt3gVU)
+
+> [👉 게임 플레이 영상 시청하기 (YouTube Shorts)](https://www.youtube.com/shorts/NEu5MJt3gVU)
+
+## �🕹️ 게임 스토리 및 주요 특징
 
 2002년 월드컵 열기가 식어가는 어느 가을날, 신촌.
 당신은 각기 다른 사연과 매력을 가진 3명의 히로인과 대화를 나누게 됩니다.
