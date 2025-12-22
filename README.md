@@ -1,51 +1,48 @@
-# ZMAN (젯뜨맨)
+# ZMAN (Project Z)
 
-![Zman Splash](./splash.jpeg)
+[한국어 문서](./README.ko.md)
 
-**ZMAN**은 2002년 신촌을 배경으로 한 **국내 최초 LLM(거대 언어 모델) 기반 NPC 미연시(미소녀 연애 시뮬레이션)**입니다. 2000년대 초반의 감성과 추억을 되살리는 레트로 컨셉의 채팅 어드벤처 게임입니다.
+**ZMAN** is an LLM-powered dating simulation game set in Seoul's Sinchon distrcit in the year 2002. It recreates the nostalgic vibe of the early 2000s, allowing players to engage in free-form conversations with AI-driven heroines.
 
-## ✨ 프로젝트 개요
+# Our Philosophy
+IDDQD Internet builds zero-DB, zero-signup tools powered by pure HTML/JS for instant browser execution. Even with AI features, we keep it stateless and record-free.
 
-이 프로젝트는 **100% Client-Side** 중심의 설계를 지향합니다.
+### [Play ZMAN](https://game.iddqd.kr/zman_tmp)
 
-- **서버 저장 없음**: 대화 내용은 서버에 저장되지 않고, 오직 사용자의 브라우저(Local Storage)에만 임시로 보관됩니다. 창을 닫으면 모든 것이 초기화됩니다.
-- **설치/로그인 불필요**: 웹사이트 접속만으로 즉시 플레이 가능합니다. 번거로운 가입 절차가 없습니다.
-- **PHP Proxy**: Gemini API 호출을 위한 PHP 프록시가 존재하지만, 단순 중계 역할만 수행하며 데이터를 저장하지 않습니다.
-- **보안**: 사용자의 개인정보를 수집하지 않는 안전한 구조입니다.
+![ZMAN Splash](./splash.jpeg)
 
-## � 플레이 영상 (Gameplay)
+## Features
+-   **LLM-Driven Conversations**: Powered by Google Gemini 2.5 Flash, NPCs respond dynamically to any input without predefined dialogue trees.
+-   **Retro 2002 Aesthetic**: Immerse yourself in the early 2000s Korean culture, featuring iconic locations like "Canmore" and "Minto".
+-   **Affinity System**: Your conversation skills directly impact the heroine's affection level. Be careful, or they might leave you!
+-   **Stateless AI**: Although a PHP proxy is used to secure API keys, no conversation logs or user data are stored on the server. All progress is saved locally in your browser.
+-   **Real-time Interaction**: Conversations evolve naturally, and unexpected events (like the appearance of a rival) can occur based on turn counts.
 
-[![ZMAN Gameplay](https://img.youtube.com/vi/NEu5MJt3gVU/hqdefault.jpg)](https://www.youtube.com/shorts/NEu5MJt3gVU)
+## Usage
+**Objective**: Win the heart of one of the three heroines through conversation.
 
-> [👉 게임 플레이 영상 시청하기 (YouTube Shorts)](https://www.youtube.com/shorts/NEu5MJt3gVU)
+1.  **Select a Heroine**: Choose from three unique characters with different personalities and difficulty levels.
+2.  **Chat**: Type your message to interact. The AI will analyze your intent and respond with text and an affection score change.
+3.  **Manage Time & Affection**: Every turn advances the in-game clock. Keep the affection meter high to avoid a "Game Over."
 
-## �🕹️ 게임 스토리 및 주요 특징
+## Characters
+-   **Kim Ji-eun (Difficulty ★★)**: A literature student nursing a broken heart at a cafe.
+-   **Lee Seo-hyun (Difficulty ★★★)**: A top student dreaming of a small deviation from her routine.
+-   **Yoon Chae-rim (Difficulty ★★★★)**: A trendy fashionista from Gangnam waiting for her friend.
 
-2002년 월드컵 열기가 식어가는 어느 가을날, 신촌.
-당신은 각기 다른 사연과 매력을 가진 3명의 히로인과 대화를 나누게 됩니다.
+## Tech Stack
+-   **Frontend**: HTML5, CSS3, JavaScript (jQuery), Bootstrap 5
+-   **Backend**: PHP (Simple Proxy for Gemini API)
+-   **AI Engine**: Google Gemini 2.5 Flash
+-   **Audio**: Web Audio API
+-   **Storage**: Browser LocalStorage
 
-- **3명의 히로인**:
-  - **이서현 (난이도 ★★)**: 캔모아에서 토스트를 먹으며 일탈을 꿈꾸는 20세 모범생
-  - **김지은 (난이도 ★★★)**: 민들레영토에서 실연의 아픔을 달래는 21세 문학소녀
-  - **윤채림 (난이도 ★★★★)**: 홍익문고 앞에서 누군가를 기다리는 21세 압구정 날라리
-- **자유로운 대화**: 정해진 선택지가 아닌, 직접 타이핑하여 대화를 이끌어 나가는 LLM 기반 자유 채팅 시스템
-- **호감도 시스템**: 당신의 대화 스킬에 따라 실시간으로 호감도(하트)가 변합니다. 호감도가 떨어지면 NPC가 떠나버릴 수도 있습니다 (Game Over).
-- **시간 시스템**: 대화를 할 때마다 1분씩 시간이 흐릅니다. (2002년 당시의 실제 시간 반영)
-- **돌발 이벤트**: 대화가 길어지면 전설의 바람둥이 '민프로'가 등장하는 돌발 이벤트가 발생합니다.
+## Disclaimer
+-   This game is a work of fiction. Characters and settings are simulated based on the year 2002.
+-   AI responses are generated in real-time and may be unpredictable.
 
-## 🛠️ 기술 스택
-
-- **Frontend**: HTML5, CSS3, JavaScript (jQuery), Bootstrap 5
-- **Backend (Proxy)**: PHP (Gemini API 통신용)
-- **AI Engine**: Google Gemini 1.5 Flash (Streaming Response)
-- **Audio**: Web Audio API (효과음), HTML5 Audio (BGM)
-- **Storage**: Browser LocalStorage
-
-## ⚠️ 라이선스 및 알림
-
-- 본 게임은 개인 프로젝트이며, 등장하는 인물 및 배경은 모두 2000년대 감성을 재현한 픽션입니다.
-- AI가 생성하는 응답은 예측 불가능할 수 있으며, 실제 인물의 의견을 대변하지 않습니다.
-
-## 🔗 링크
-
-- **개발자 홈페이지**: [IDDQD Internet](https://iddqd.kr)
+# Contact & Author
+Park Sil-jang
+- Dev Team Lead at IDDQD Internet. E-solution & E-game Lead. Bushwhacking Code Shooter. Currently executing mandates as Choi’s Schemer.
+- HQ (EN): https://en.iddqd.kr/
+- GitHub: https://github.com/iddqd-park
